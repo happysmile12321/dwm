@@ -40,10 +40,11 @@
 #include <X11/extensions/Xinerama.h>
 #endif /* XINERAMA */
 #include <X11/Xft/Xft.h>
+#include <semaphore.h>
+#include <pthread.h>
 
 #include "drw.h"
 #include "util.h"
-#include "th.c"
 
 /* macros */
 #define BUTTONMASK              (ButtonPressMask|ButtonReleaseMask)
@@ -230,7 +231,6 @@ static void resizemouse(const Arg *arg);
 static void resizerequest(XEvent *e);
 static void restack(Monitor *m);
 static void run(void);
-static void runAutostart(void);
 static void scan(void);
 static int sendevent(Window w, Atom proto, int m, long d0, long d1, long d2, long d3, long d4);
 static void sendmon(Client *c, Monitor *m);
@@ -282,6 +282,8 @@ static int xerrordummy(Display *dpy, XErrorEvent *ee);
 static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void xinitvisual();
 static void zoom(const Arg *arg);
+static void runautonowaitstartthread(void);
+static void runautonowaitstart(void);
 
 /* variables */
 static Systray *systray =  NULL;
@@ -1637,9 +1639,34 @@ run(void)
 			handler[ev.type](&ev); /* call handler */
 }
 
+
+/*a thread , can do start tasks no wait.
+ * */
 void
-runAutostart(void) {
-		do_some_thing("cd ~/Desktop/suckless/dwm/dwmblocks/my.scripts; ./dwm.autostart.sh &");
+runautonowaitstartthread(void)
+{
+	system("cd ~/Desktop/suckless/dwm/dwmblocks/my.scripts; ./dwm.autostart.sh &");
+}
+
+/*run the thread
+ * */
+void
+runautonowaitstart(void)
+{
+	sem_t s;
+	pthread_t thread;
+	if(pthread_create(&thread,NULL,runautonowaitstartthread,NULL)<0)
+	{
+	    perror("runautonowaitstart:create thread error!");
+	    exit(-1);
+	}
+    pthread_join(thread, NULL);
+	if(sem_init(&s,0,1)<0)
+	{
+		perror("runautonowaitstart:sem_init_error!");
+		exit(1);
+	}
+
 }
 
 void
@@ -2732,8 +2759,8 @@ main(int argc, char *argv[])
 		die("pledge");
 #endif /* __OpenBSD__ */
 	scan();
-	runAutostart();
 	run();
+	runautonowaitstart();
 	cleanup();
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;
