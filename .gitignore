@@ -1,0 +1,6 @@
+*.orig
+st
+*.info
+*.rej
+*.o
+dwm
