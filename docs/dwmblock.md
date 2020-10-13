@@ -16,3 +16,8 @@ So I don't give it an external repo.
 - pamixer
 
 and you might want to change config.h's absolute path.
+
+## You must compile it.
+
+Because it is a C progame.
+So,you will need to sudo make clean install on dwmblock directory.
