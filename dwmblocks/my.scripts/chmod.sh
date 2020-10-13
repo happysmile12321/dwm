@@ -1,4 +1,4 @@
-#!/bin/bash
+#pamixer!/bin/bash
 
 IFS=$(echo -en "\n\b")
 mychmod(){

@@ -2,6 +2,7 @@
 
 - [what is dwm](./docs/dwm.md)
 - [how to Use my dwm](./docs/usage.md)
+- [what is dwmblock,and what software you should have](./docs/dwmblock.md)
 
 ## Usage
 
